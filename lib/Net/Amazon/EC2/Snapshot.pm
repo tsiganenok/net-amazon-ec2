@@ -1,5 +1,5 @@
 package Net::Amazon::EC2::Snapshot;
-use Moose;
+use Moo;
 
 =head1 NAME
 
@@ -53,17 +53,15 @@ The AWS account alias (e.g., "amazon", "redhat", "self", etc.) or AWS account ID
 
 =cut
 
-has 'snapshot_id'	=> ( is => 'ro', isa => 'Str', required => 1 );
-has 'status'		=> ( is => 'ro', isa => 'Str', required => 1 );
-has 'volume_id'		=> ( is => 'ro', isa => 'Str', required => 1 );
-has 'start_time'	=> ( is => 'ro', isa => 'Str', required => 1 );
-has 'progress'		=> ( is => 'ro', isa => 'Maybe[Str]', required => 0 );
-has 'owner_id'		=> ( is => 'ro', isa => 'Str', required => 1 );
-has 'volume_size'	=> ( is => 'ro', isa => 'Str', required => 1 );
-has 'description'	=> ( is => 'ro', isa => 'Maybe[Str]', required => 0 );
-has 'owner_alias'	=> ( is => 'ro', isa => 'Maybe[Str]', required => 0 );
-
-__PACKAGE__->meta->make_immutable();
+has 'snapshot_id'	=> ( is => 'ro', required => 1 );
+has 'status'		=> ( is => 'ro', required => 1 );
+has 'volume_id'		=> ( is => 'ro', required => 1 );
+has 'start_time'	=> ( is => 'ro', required => 1 );
+has 'progress'		=> ( is => 'ro', required => 0 );
+has 'owner_id'		=> ( is => 'ro', required => 1 );
+has 'volume_size'	=> ( is => 'ro', required => 1 );
+has 'description'	=> ( is => 'ro', required => 0 );
+has 'owner_alias'	=> ( is => 'ro', required => 0 );
 
 =head1 AUTHOR
 
@@ -76,5 +74,4 @@ under the same terms as Perl itself.
 
 =cut
 
-no Moose;
 1;

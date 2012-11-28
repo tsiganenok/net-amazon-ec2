@@ -1,5 +1,5 @@
 package Net::Amazon::EC2::Errors;
-use Moose;
+use Moo;
 
 =head1 NAME
 
@@ -23,15 +23,12 @@ An array ref of Net::Amazon::EC2::Error objects associated with this request.
 
 =cut
 
-has 'request_id'    => ( is => 'ro', isa => 'Str', required => 1 );
+has 'request_id'    => ( is => 'ro', required => 1 );
 has 'errors'        => ( 
     is          => 'rw', 
-    isa         => 'ArrayRef[Net::Amazon::EC2::Error]',
-    predicate   => 'has_errors',
+    predicate   => 1,
     required    => 1,
 );
-
-__PACKAGE__->meta->make_immutable();
 
 =back
 
@@ -46,5 +43,4 @@ under the same terms as Perl itself.
 
 =cut
 
-no Moose;
 1;

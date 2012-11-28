@@ -1,5 +1,5 @@
 package Net::Amazon::EC2::Error;
-use Moose;
+use Moo;
 
 =head1 NAME
 
@@ -23,10 +23,8 @@ The long form message about the error.
 
 =cut
 
-has 'code'      => ( is => 'ro', isa => 'Str', required => 1 );
-has 'message'   => ( is => 'ro', isa => 'Str', required => 1 );
-
-__PACKAGE__->meta->make_immutable();
+has 'code'      => ( is => 'ro', required => 1 );
+has 'message'   => ( is => 'ro', required => 1 );
 
 =back
 
@@ -41,5 +39,4 @@ under the same terms as Perl itself.
 
 =cut
 
-no Moose;
 1;

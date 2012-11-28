@@ -1,5 +1,5 @@
 package Net::Amazon::EC2::GroupSet;
-use Moose;
+use Moo;
 
 =head1 NAME
 
@@ -19,10 +19,8 @@ The ID of the group.
 
 =cut
 
-has 'group_id'  => ( is => 'ro', isa => 'Str', required => 1 );
-has 'group_name' => ( is => 'ro', isa => 'Str', required => 1 );
-
-__PACKAGE__->meta->make_immutable();
+has 'group_id'  => ( is => 'ro', required => 1 );
+has 'group_name' => ( is => 'ro', required => 1 );
 
 =back
 
@@ -37,5 +35,4 @@ under the same terms as Perl itself.
 
 =cut
 
-no Moose;
 1;

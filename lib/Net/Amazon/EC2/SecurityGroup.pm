@@ -1,5 +1,5 @@
 package Net::Amazon::EC2::SecurityGroup;
-use Moose;
+use Moo;
 
 =head1 NAME
 
@@ -31,17 +31,14 @@ An array ref of Net::Amazon::EC2::IpPermission objects.
 
 =cut
 
-has 'owner_id'          => ( is => 'ro', isa => 'Str', required => 1 );
-has 'group_name'        => ( is => 'ro', isa => 'Str', required => 1 );
-has 'group_description' => ( is => 'ro', isa => 'Str', required => 1 );
+has 'owner_id'          => ( is => 'ro', required => 1 );
+has 'group_name'        => ( is => 'ro', required => 1 );
+has 'group_description' => ( is => 'ro', required => 1 );
 has 'ip_permissions'    => ( 
     is          => 'ro', 
-    isa         => 'Maybe[ArrayRef[Net::Amazon::EC2::IpPermission]]',
-    predicate   => 'has_ip_permissions',
+    predicate   => 1,
     default		=> sub { [ ] },
 );
-
-__PACKAGE__->meta->make_immutable();
 
 =back
 
@@ -56,5 +53,4 @@ under the same terms as Perl itself.
 
 =cut
 
-no Moose;
 1;

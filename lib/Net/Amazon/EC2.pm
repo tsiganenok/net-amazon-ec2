@@ -16,56 +16,12 @@ use Data::Dumper qw(Dumper);
 use URI::Escape qw(uri_escape_utf8);
 use Carp;
 
+# load our related classes and create our attributes to manage them
 with 'MooseX::RelatedClasses' => {
     -version         => 0.002,
     all_in_namespace => 1,
 };
 
-use Net::Amazon::EC2::DescribeImagesResponse;
-use Net::Amazon::EC2::DescribeKeyPairsResponse;
-use Net::Amazon::EC2::GroupSet;
-use Net::Amazon::EC2::InstanceState;
-use Net::Amazon::EC2::IpPermission;
-use Net::Amazon::EC2::LaunchPermission;
-use Net::Amazon::EC2::LaunchPermissionOperation;
-use Net::Amazon::EC2::ProductCode;
-use Net::Amazon::EC2::ProductInstanceResponse;
-use Net::Amazon::EC2::ReservationInfo;
-use Net::Amazon::EC2::RunningInstances;
-use Net::Amazon::EC2::SecurityGroup;
-use Net::Amazon::EC2::UserData;
-use Net::Amazon::EC2::UserIdGroupPair;
-use Net::Amazon::EC2::IpRange;
-use Net::Amazon::EC2::KeyPair;
-use Net::Amazon::EC2::DescribeImageAttribute;
-use Net::Amazon::EC2::ConsoleOutput;
-use Net::Amazon::EC2::Errors;
-use Net::Amazon::EC2::Error;
-use Net::Amazon::EC2::ConfirmProductInstanceResponse;
-use Net::Amazon::EC2::DescribeAddress;
-use Net::Amazon::EC2::AvailabilityZone;
-use Net::Amazon::EC2::BlockDeviceMapping;
-use Net::Amazon::EC2::PlacementResponse;
-use Net::Amazon::EC2::Volume;
-use Net::Amazon::EC2::Attachment;
-use Net::Amazon::EC2::Snapshot;
-use Net::Amazon::EC2::BundleInstanceResponse;
-use Net::Amazon::EC2::Region;
-use Net::Amazon::EC2::ReservedInstance;
-use Net::Amazon::EC2::ReservedInstanceOffering;
-use Net::Amazon::EC2::MonitoredInstance;
-use Net::Amazon::EC2::InstancePassword;
-use Net::Amazon::EC2::SnapshotAttribute;
-use Net::Amazon::EC2::CreateVolumePermission;
-use Net::Amazon::EC2::AvailabilityZoneMessage;
-use Net::Amazon::EC2::StateReason;
-use Net::Amazon::EC2::InstanceBlockDeviceMapping;
-use Net::Amazon::EC2::InstanceStateChange;
-use Net::Amazon::EC2::DescribeInstanceAttributeResponse;
-use Net::Amazon::EC2::EbsInstanceBlockDeviceMapping;
-use Net::Amazon::EC2::EbsBlockDevice;
-use Net::Amazon::EC2::TagSet;
-use Net::Amazon::EC2::DescribeTags;
 $VERSION = '0.22';
 
 =head1 NAME

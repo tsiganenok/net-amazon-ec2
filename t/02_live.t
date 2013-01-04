@@ -2,6 +2,8 @@ use strict;
 use blib;
 use Test::More;
 
+use MIME::Base64 qw(encode_base64);
+
 BEGIN { 
     if (! $ENV{AWS_ACCESS_KEY_ID} || ! $ENV{SECRET_ACCESS_KEY} ) {
         plan skip_all => "Set AWS_ACCESS_KEY_ID and SECRET_ACCESS_KEY environment variables to run these _LIVE_ tests (NOTE: they will incur one instance hour of costs from EC2)";
@@ -84,6 +86,45 @@ ok($seen_test_rule == 1, "Checking for created authorized security group rule in
 my $revoke_result = $ec2->revoke_security_group_ingress(GroupName => "test_group", IpProtocol => 'tcp', FromPort => '7003', ToPort => '7003', CidrIp => '10.253.253.253/32');
 ok($revoke_result == 1, "Checking for revocation of rule for security group");
 
+my $user_data =<<_EOF;
+I am the very model of a modern Major-General,
+I've information vegetable, animal, and mineral,
+I know the kings of England, and I quote the fights historical
+From Marathon to Waterloo, in order categorical;
+I'm very well acquainted, too, with matters mathematical,
+I understand equations, both the simple and quadratical,
+About binomial theorem I'm teeming with a lot o' news,
+With many cheerful facts about the square of the hypotenuse.
+I'm very good at integral and differential calculus;
+I know the scientific names of beings animalculous:
+In short, in matters vegetable, animal, and mineral,
+I am the very model of a modern Major-General.
+I know our mythic history, King Arthur's and Sir Caradoc's;
+I answer hard acrostics, I've a pretty taste for paradox,
+I quote in elegiacs all the crimes of Heliogabalus,
+In conics I can floor peculiarities parabolous;
+I can tell undoubted Raphaels from Gerard Dows and Zoffanies,
+I know the croaking chorus from The Frogs of Aristophanes!
+Then I can hum a fugue of which I've heard the music's din afore,
+And whistle all the airs from that infernal nonsense Pinafore.
+Then I can write a washing bill in Babylonic cuneiform,
+And tell you ev'ry detail of Caractacus's uniform:
+In short, in matters vegetable, animal, and mineral,
+I am the very model of a modern Major-General.
+In fact, when I know what is meant by "mamelon" and "ravelin",
+When I can tell at sight a Mauser rifle from a Javelin,
+When such affairs as sorties and surprises I'm more wary at,
+And when I know precisely what is meant by "commissariat",
+When I have learnt what progress has been made in modern gunnery,
+When I know more of tactics than a novice in a nunnery—
+In short, when I've a smattering of elemental strategy—
+You'll say a better Major-General has never sat a gee.
+For my military knowledge, though I'm plucky and adventury,
+Has only been brought down to the beginning of the century;
+But still, in matters vegetable, animal, and mineral,
+I am the very model of a modern Major-General.
+_EOF
+
 # run_instances
 my $run_result = $ec2->run_instances(
         MinCount        => 1, 
@@ -92,6 +133,7 @@ my $run_result = $ec2->run_instances(
         KeyName         => "test_keys", 
         SecurityGroup   => "test_group",
         InstanceType    => 'm1.small',
+        UserData        => encode_base64($user_data, ""),
         EbsOptimized    => 0,
 );
 isa_ok($run_result, 'Net::Amazon::EC2::ReservationInfo');

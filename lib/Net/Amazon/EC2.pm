@@ -1093,7 +1093,8 @@ The size in GiB ( 1024^3 ) of the volume you want to create.
 
 =item SnapshotId (optional)
 
-The optional snapshot id to create the volume from.
+The optional snapshot id to create the volume from. The volume must
+be equal or larger than the snapshot it was created from.
 
 =item AvailabilityZone (required)
 

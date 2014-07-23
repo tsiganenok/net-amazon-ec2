@@ -1,3 +1,8 @@
+0.26   2014-07-23
+       Stephen Day      Increased AWS API version to 2014-06-15
+       Stephen Day      Added encrypted volume support
+       Stephen Day      Minor documentation updates.
+
 0.25   2014-07-02 
        Steve Caldwell   Support VolumeType param to BlockDeviceMapping
        Mark Allen       Fix POD to use proper case for arguments in

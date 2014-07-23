@@ -1089,7 +1089,7 @@ Creates a volume.
 
 =item Size (required)
 
-The size in GiB of the volume you want to create.
+The size in GiB ( 1024^3 ) of the volume you want to create.
 
 =item SnapshotId (optional)
 
@@ -1101,13 +1101,15 @@ The availability zone to create the volume in.
 
 =item VolumeType (optional)
 
-The volume type: 'standard' or 'io1'.  Defaults to 'standard'.
+The volume type: 'standard', 'gp2', or 'io1'.  Defaults to 'standard'.
 
-=item Iops (optional)
+=item Iops (required if VolumeType is 'io1')
 
 The number of I/O operations per second (IOPS) that the volume
-supports.  Required when the volume type is io1; not used with
-standard volumes.
+supports. This is limited to 30 times the volume size with an absolute maximum
+of 4000. It's likely these numbers will change in the future.
+
+Required when the volume type is io1; not used otherwise.
 
 =item Encrypted (optional)
 

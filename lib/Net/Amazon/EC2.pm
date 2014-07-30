@@ -2422,6 +2422,10 @@ This method describes the security groups available to this account. It takes th
 
 The name of the security group(s) to be described. Can be either a scalar or an array ref.
 
+=item GroupId (optional)
+
+The id of the security group(s) to be described. Can be either a scalar or an array ref.
+
 =back
 
 Returns an array ref of Net::Amazon::EC2::SecurityGroup objects
@@ -2432,18 +2436,27 @@ sub describe_security_groups {
 	my $self = shift;
 	my %args = validate( @_, {
 		GroupName => { type => SCALAR | ARRAYREF, optional => 1 },
+		GroupId => { type => SCALAR | ARRAYREF, optional => 1 },
 	});
 
-	# If we have a array ref of instances lets split them out into their InstanceId.n format
+	# If we have a array ref of GroupNames lets split them out into their GroupName.n format
 	if (ref ($args{GroupName}) eq 'ARRAY') {
 		my $groups = delete $args{GroupName};
 		my $count = 1;
 		foreach my $group (@{$groups}) {
-			$args{"GroupName." . $count} = $group;
-			$count++;
+			$args{"GroupName." . $count++} = $group;
 		}
 	}
 	
+	# If we have a array ref of GroupIds lets split them out into their GroupId.n format
+	if (ref ($args{GroupId}) eq 'ARRAY') {
+		my $groups = delete $args{GroupId};
+		my $count = 1;
+		foreach my $group (@{$groups}) {
+			$args{"GroupId." . $count++} = $group;
+		}
+	}
+
 	my $xml = $self->_sign(Action  => 'DescribeSecurityGroups', %args);
 	
 	if ( grep { defined && length } $xml->{Errors} ) {
@@ -2454,8 +2467,10 @@ sub describe_security_groups {
 		foreach my $sec_grp (@{$xml->{securityGroupInfo}{item}}) {
 			my $owner_id = $sec_grp->{ownerId};
 			my $group_name = $sec_grp->{groupName};
+			my $group_id = $sec_grp->{groupId};
 			my $group_description = $sec_grp->{groupDescription};
 			my $ip_permissions;
+			my $ip_permissions_egress;
 
 			foreach my $ip_perm (@{$sec_grp->{ipPermissions}{item}}) {
 				my $ip_protocol = $ip_perm->{ipProtocol};
@@ -2507,11 +2522,63 @@ sub describe_security_groups {
 				push @$ip_permissions, $ip_permission;
 			}
 			
+			foreach my $ip_perm (@{$sec_grp->{ipPermissionsEgress}{item}}) {
+				my $ip_protocol = $ip_perm->{ipProtocol};
+				my $from_port	= $ip_perm->{fromPort};
+				my $to_port		= $ip_perm->{toPort};
+				my $icmp_port	= $ip_perm->{icmpPort};
+				my $groups;
+				my $ip_ranges;
+				
+				if (grep { defined && length } $ip_perm->{groups}{item}) {
+					foreach my $grp (@{$ip_perm->{groups}{item}}) {
+						my $group = Net::Amazon::EC2::UserIdGroupPair->new(
+							user_id		=> $grp->{userId},
+							group_name	=> $grp->{groupName},
+						);
+						
+						push @$groups, $group;
+					}
+				}
+				
+				if (grep { defined && length } $ip_perm->{ipRanges}{item}) {
+					foreach my $rng (@{$ip_perm->{ipRanges}{item}}) {
+						my $ip_range = Net::Amazon::EC2::IpRange->new(
+							cidr_ip => $rng->{cidrIp},
+						);
+						
+						push @$ip_ranges, $ip_range;
+					}
+				}
+
+								
+				my $ip_permission = Net::Amazon::EC2::IpPermission->new(
+					ip_protocol			=> $ip_protocol,
+					group_name			=> $group_name,
+					group_description	=> $group_description,
+					from_port			=> $from_port,
+					to_port				=> $to_port,
+					icmp_port			=> $icmp_port,
+				);
+				
+				if ($ip_ranges) {
+					$ip_permission->ip_ranges($ip_ranges);
+				}
+
+				if ($groups) {
+					$ip_permission->groups($groups);
+				}
+				
+				push @$ip_permissions_egress, $ip_permission;
+			}
+
 			my $security_group = Net::Amazon::EC2::SecurityGroup->new(
 				owner_id			=> $owner_id,
 				group_name			=> $group_name,
+				group_id			=> $group_id,
 				group_description	=> $group_description,
 				ip_permissions		=> $ip_permissions,
+				ip_permissions_egress	=> $ip_permissions_egress,
 			);
 			
 			push @$security_groups, $security_group;

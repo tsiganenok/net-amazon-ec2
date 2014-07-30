@@ -414,7 +414,7 @@ sub _build_filters {
 
 =head2 allocate_address()
 
-Acquires an elastic IP address which can be associated with an instance to create a movable static IP. Takes no arguments
+Acquires an elastic IP address which can be associated with an EC2-classic instance to create a movable static IP. Takes no arguments.
 
 Returns the IP address obtained.
 
@@ -433,6 +433,27 @@ sub allocate_address {
 	}
 }
 
+=head2 allocate_vpc_address()
+
+Acquires an elastic IP address which can be associated with a VPC instance to create a movable static IP. Takes no arguments.
+
+Returns the allocationId of the allocated address.
+
+=cut
+
+sub allocate_vpc_address {
+        my $self = shift;
+
+        my $xml = $self->_sign(Action  => 'AllocateAddress', Domain => 'vpc');
+
+        if ( grep { defined && length } $xml->{Errors} ) {
+                return $self->_parse_errors($xml);
+        }
+        else {
+                return $xml->{allocationId};
+        }
+}
+
 =head2 associate_address(%params)
 
 Associates an elastic IP address with an instance. It takes the following arguments:
@@ -445,11 +466,11 @@ The instance id you wish to associate the IP address with
 
 =item PublicIp (optional)
 
-The IP address to associate with
+The IP address. Used for allocating addresses to EC2-classic instances.
 
 =item AllocationId (optional)
 
-The allocation id if IP will be assigned in a virtual private cloud.
+The allocation ID.  Used for allocating address to VPC instances.
 
 =back
 

@@ -61,6 +61,11 @@ use Net::Amazon::EC2::EbsInstanceBlockDeviceMapping;
 use Net::Amazon::EC2::EbsBlockDevice;
 use Net::Amazon::EC2::TagSet;
 use Net::Amazon::EC2::DescribeTags;
+use Net::Amazon::EC2::Details;
+use Net::Amazon::EC2::Events;
+use Net::Amazon::EC2::InstanceStatus;
+use Net::Amazon::EC2::InstanceStatuses;
+use Net::Amazon::EC2::SystemStatus;
 
 $VERSION = '0.27';
 
@@ -2046,6 +2051,146 @@ sub describe_instances {
 	}
 
 	return $reservations;
+}
+
+=head2 describe_instance_status(%params)
+
+This method pulls a list of the instances based on some status filter.  The list can be modified by passing in some of the following parameters:
+
+=over
+
+=item InstanceId (optional)
+
+Either a scalar or an array ref can be passed in, will cause just these instances to be 'described'
+
+=item Filter (optional)
+
+The filters for only the matching instances to be 'described'.
+A filter tuple is an arrayref constsing one key and one or more values.
+The option takes one filter tuple, or an arrayref of multiple filter tuples.
+
+=back
+
+Returns an array ref of Net::Amazon::EC2::InstanceStatuses objects
+
+=cut
+
+sub describe_instance_status {
+    my $self = shift;
+    my %args = validate(
+        @_,
+        {
+            InstanceId => { type => SCALAR | ARRAYREF, optional => 1 },
+            Filter     => { type => ARRAYREF,          optional => 1 },
+        }
+    );
+
+# If we have a array ref of instances lets split them out into their InstanceId.n format
+    if ( ref( $args{InstanceId} ) eq 'ARRAY' ) {
+        my $instance_ids = delete $args{InstanceId};
+        my $count        = 1;
+        foreach my $instance_id ( @{$instance_ids} ) {
+            $args{ "InstanceId." . $count } = $instance_id;
+            $count++;
+        }
+    }
+
+    $self->_build_filters( \%args );
+    my $xml = $self->_sign( Action => 'DescribeInstanceStatus', %args );
+    my $instancestatuses;
+
+    if ( grep { defined && length } $xml->{Errors} ) {
+        return $self->_parse_errors($xml);
+    }
+    else {
+        foreach my $instancestatus_elem ( @{ $xml->{instanceStatusSet}{item} } )
+        {
+            my $group_sets = [];
+
+            my $instancestatus_state = Net::Amazon::EC2::InstanceState->new(
+                code => $instancestatus_elem->{instanceState}{code},
+                name => $instancestatus_elem->{instanceState}{name},
+            );
+
+            foreach
+              my $events_arr ( @{ $instancestatus_elem->{eventsSet}{item} } )
+            {
+                my $events;
+                if ( grep { defined && length } $events_arr->{notAfter} ) {
+                    $events = Net::Amazon::EC2::Events->new(
+                        code        => $events_arr->{code},
+                        description => $events_arr->{description},
+                        not_before  => $events_arr->{notBefore},
+                        not_after   => $events_arr->{notAfter},
+                    );
+                }
+                else {
+                    $events = Net::Amazon::EC2::Events->new(
+                        code        => $events_arr->{code},
+                        description => $events_arr->{description},
+                        not_before  => $events_arr->{notBefore},
+                    );
+                }
+                push @$group_sets, $events;
+            }
+
+            my $instancestatus_istatus;
+            if ( grep { defined && length }
+                $instancestatus_elem->{instanceStatus} )
+            {
+                my $details_set = [];
+                foreach my $details_arr (
+                    @{ $instancestatus_elem->{instanceStatus}{details}{item} } )
+                {
+                    my $details = Net::Amazon::EC2::Details->new(
+                        status => $details_arr->{status},
+                        name   => $details_arr->{name},
+                    );
+                    push @$details_set, $details;
+                }
+                $instancestatus_istatus =
+                  Net::Amazon::EC2::InstanceStatus->new(
+                    status  => $instancestatus_elem->{instanceStatus}{status},
+                    details => $details_set,
+                  );
+            }
+
+            my $instancestatus_sstatus;
+            if ( grep { defined && length }
+                $instancestatus_elem->{systemStatus} )
+            {
+                my $details_set = [];
+                foreach my $details_arr (
+                    @{ $instancestatus_elem->{systemStatus}{details}{item} } )
+                {
+                    my $details = Net::Amazon::EC2::Details->new(
+                        status => $details_arr->{status},
+                        name   => $details_arr->{name},
+                    );
+                    push @$details_set, $details;
+                }
+                $instancestatus_sstatus = Net::Amazon::EC2::SystemStatus->new(
+                    status  => $instancestatus_elem->{systemStatus}{status},
+                    details => $details_set,
+                );
+            }
+
+            my $instance_status = Net::Amazon::EC2::InstanceStatuses->new(
+                availability_zone => $instancestatus_elem->{availabilityZone},
+                events            => $group_sets,
+                instance_id       => $instancestatus_elem->{instanceId},
+                instance_state    => $instancestatus_state,
+                instance_status   => $instancestatus_istatus,
+                system_status     => $instancestatus_sstatus,
+
+            );
+
+            push @$instancestatuses, $instance_status;
+        }
+
+    }
+
+    return $instancestatuses;
 }
 
 =head2 describe_instance_attribute(%params)

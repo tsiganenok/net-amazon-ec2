@@ -36,7 +36,7 @@ Matt West <https://github.com/mhwest13>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2014 Matt West This program is free software; you can redistribute it and/or modify it
+Copyright (c) 2014 Matt West. This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
 =cut

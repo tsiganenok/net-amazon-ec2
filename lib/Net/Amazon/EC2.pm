@@ -67,7 +67,7 @@ use Net::Amazon::EC2::InstanceStatus;
 use Net::Amazon::EC2::InstanceStatuses;
 use Net::Amazon::EC2::SystemStatus;
 
-$VERSION = '0.27';
+$VERSION = '0.28';
 
 =head1 NAME
 
@@ -76,7 +76,7 @@ environment.
 
 =head1 VERSION
 
-This is Net::Amazon::EC2 version 0.27
+This is Net::Amazon::EC2 version 0.28
 
 EC2 Query API version: '2014-06-15'
 

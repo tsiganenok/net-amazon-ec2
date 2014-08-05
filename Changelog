@@ -1,3 +1,7 @@
+0.28   2014-08-04
+       Matt West        Add describe_instance_status() call and data modules.
+       Mark Allen       Fix up describe_instance_status() test if it returns undef
+
 0.27   2014-07-31
        Stephen Day      Added egress rules to describe_security_groups
        Stephen Day      Add allocate_vpc_address plus minor documentation changes.

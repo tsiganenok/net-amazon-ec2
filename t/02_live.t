@@ -9,7 +9,7 @@ BEGIN {
         plan skip_all => "Set AWS_ACCESS_KEY_ID and SECRET_ACCESS_KEY environment variables to run these _LIVE_ tests (NOTE: they will incur one instance hour of costs from EC2)";
     }
     else {
-        plan tests => 28;
+        plan tests => 29;
         use_ok( 'Net::Amazon::EC2' );
     }
 };
@@ -255,5 +255,8 @@ ok($describe_volume->[0]->volume_id, $volume->volume_id);
 my $delete_volume = $ec2->delete_volume( { VolumeId => $volume->volume_id } );
 ok($delete_volume == 1, "Deleting volume");
 
+# describe_instance_status
+my $instance_statuses = $ec2->describe_instance_status();
+isa_ok($instance_statuses->[0], 'Net::Amazon::EC2::InstanceStatuses');
 
 # THE REST OF THE METHODS ARE SKIPPED FOR NOW SINCE IT WOULD REQUIRE A DECENT AMOUNT OF TIME IN BETWEEN OPERATIONS TO COMPLETE

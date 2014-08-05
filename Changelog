@@ -1,3 +1,8 @@
+0.29   2014-08-04       
+       Mark Allen       Because I am an idiot and forgot to update the MANIFEST,
+                        5 pm files were left out of the previous release.
+						D'oh!
+
 0.28   2014-08-04
        Matt West        Add describe_instance_status() call and data modules.
        Mark Allen       Fix up describe_instance_status() test if it returns undef

@@ -67,7 +67,7 @@ use Net::Amazon::EC2::InstanceStatus;
 use Net::Amazon::EC2::InstanceStatuses;
 use Net::Amazon::EC2::SystemStatus;
 
-$VERSION = '0.29_01';
+$VERSION = '0.29_02';
 
 =head1 NAME
 
@@ -2615,6 +2615,7 @@ sub describe_security_groups {
 			my $group_id = $sec_grp->{groupId};
 			my $group_description = $sec_grp->{groupDescription};
 			my $vpc_id = $sec_grp->{vpcId};
+			my $tag_set;
 			my $ip_permissions;
 			my $ip_permissions_egress;
 
@@ -2717,12 +2718,23 @@ sub describe_security_groups {
 				
 				push @$ip_permissions_egress, $ip_permission;
 			}
+			
+			
+			foreach my $sec_tag (@{$sec_grp->{tagSet}{item}})
+			{
+				my $tag = Net::Amazon::EC2::TagSet->new(
+					key => $sec_tag->{key},
+					value => $sec_tag->{value},
+				);
+				push @$tag_set, $tag;
+			}
 
 			my $security_group = Net::Amazon::EC2::SecurityGroup->new(
 				owner_id			=> $owner_id,
 				group_name			=> $group_name,
 				group_id			=> $group_id,
 				vpc_id 	 			=> $vpc_id,
+				tag_set 			=> $tag_set,
 				group_description	=> $group_description,
 				ip_permissions		=> $ip_permissions,
 				ip_permissions_egress	=> $ip_permissions_egress,

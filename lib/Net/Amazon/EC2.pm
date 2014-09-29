@@ -2112,6 +2112,7 @@ sub describe_instance_status {
         }
 
         if ( grep { defined && length } $xml->{nextToken} ) {
+            $token = $xml->{nextToken};
             while(1) {
                 $args{NextToken} = $token;
                 $self->_build_filters( \%args );

@@ -18,6 +18,7 @@ use Carp;
 
 use Net::Amazon::EC2::DescribeImagesResponse;
 use Net::Amazon::EC2::DescribeKeyPairsResponse;
+use Net::Amazon::EC2::DescribeSubnetResponse;
 use Net::Amazon::EC2::GroupSet;
 use Net::Amazon::EC2::InstanceState;
 use Net::Amazon::EC2::IpPermission;
@@ -2997,6 +2998,106 @@ sub describe_volumes {
 		
 		return $volumes;
 	}
+}
+
+
+=head2 describe_subnets(%params)
+
+This method describes the subnets on this account. It takes the following parameters:
+
+=over
+
+=item SubnetId (optional)
+
+The id of a subnet to be described.  Can either be a scalar or an array ref.
+
+=item Filter.Name (optional)
+
+The name of the Filter.Name to be described. Can be either a scalar or an array ref.
+See http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeSubnets.html
+for available filters.
+
+=item Filter.Value (optional)
+
+The name of the Filter.Value to be described. Can be either a scalar or an array ref.
+
+=back
+
+Returns an array ref of Net::Amazon::EC2::DescribeSubnetResponse objects
+
+=cut
+
+sub describe_subnets {
+  my $self = shift;
+  my %args = validate( @_, {
+      'SubnetId'            => { type => ARRAYREF | SCALAR, optional => 1 },
+      'Filter.Name'         => { type => ARRAYREF | SCALAR, optional => 1 },
+      'Filter.Value'        => { type => ARRAYREF | SCALAR, optional => 1 },
+  });
+
+  if (ref ($args{'SubnetId'}) eq 'ARRAY') {
+    my $keys      = delete $args{'SubnetId'};
+    my $count     = 1;
+    foreach my $key (@{$keys}) {
+      $args{"SubnetId." . $count } = $key;
+      $count++;
+    }
+  }
+  if (ref ($args{'Filter.Name'}) eq 'ARRAY') {
+    my $keys      = delete $args{'Filter.Name'};
+    my $count     = 1;
+    foreach my $key (@{$keys}) {
+      $args{"Filter." . $count . ".Name"} = $key;
+      $count++;
+    }
+  }
+  if (ref ($args{'Filter.Value'}) eq 'ARRAY') {
+    my $keys      = delete $args{'Filter.Value'};
+    my $count     = 1;
+    foreach my $key (@{$keys}) {
+      $args{"Filter." . $count . ".Value"} = $key;
+      $count++;
+    }
+  }
+
+  my $xml = $self->_sign(Action  => 'DescribeSubnets', %args);
+
+  if ( grep { defined && length } $xml->{Errors} ) {
+    return $self->_parse_errors($xml);
+  }
+  else {
+    my $subnets;
+
+    foreach my $pair (@{$xml->{subnetSet}{item}}) {
+      my $tags;
+
+      foreach my $tag_arr (@{$pair->{tagSet}{item}}) {
+        if ( ref $tag_arr->{value} eq "HASH" ) {
+          $tag_arr->{value} = "";
+        }
+        my $tag = Net::Amazon::EC2::TagSet->new(
+          key => $tag_arr->{key},
+          value => $tag_arr->{value},
+        );
+        push @$tags, $tag;
+      }
+
+      my $subnet = Net::Amazon::EC2::DescribeSubnetResponse->new(
+        subnet_id                  => $pair->{subnetId},
+        state                      => $pair->{state},
+        vpc_id                     => $pair->{vpcId},
+        cidr_block                 => $pair->{cidrBlock},
+        available_ip_address_count => $pair->{availableIpAddressCount},
+        availability_zone          => $pair->{availabilityZone},
+        default_for_az             => $pair->{defaultForAz},
+        map_public_ip_on_launch    => $pair->{mapPublicIpOnLaunch},
+        tag_set                    => $tags,
+      );
+
+      push @$subnets, $subnet;
+    }
+    return $subnets;
+  }
 }
 
 =head2 describe_tags(%params)

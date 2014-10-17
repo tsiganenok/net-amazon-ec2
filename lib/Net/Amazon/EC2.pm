@@ -216,7 +216,7 @@ has 'base_url'			=> (
 	required	=> 1,
 	lazy		=> 1,
 	default		=> sub {
-		return 'http' . ($_[0]->ssl ? 's' : '') . '://' . $_[0]->region . '.ec2.amazonaws.com';
+		return 'http' . ($_[0]->ssl ? 's' : '') . '://ec2.' . $_[0]->region . '.amazonaws.com';
 	}
 );
 has 'temp_creds'       => ( is => 'ro',

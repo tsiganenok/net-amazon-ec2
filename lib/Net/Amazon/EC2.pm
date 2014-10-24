@@ -2082,6 +2082,8 @@ sub describe_instance_status {
         {
             InstanceId => { type => SCALAR | ARRAYREF, optional => 1 },
             Filter     => { type => ARRAYREF,          optional => 1 },
+            MaxResults => { type => SCALAR, optional => 1 },
+            NextToken  => { type => SCALAR, optional => 1 },
         }
     );
 

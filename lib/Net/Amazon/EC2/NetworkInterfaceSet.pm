@@ -70,7 +70,7 @@ has 'vpc_id' => (
 
 has 'description' => (
    is       => 'ro',
-   isa      => 'Str',
+   isa      => 'Maybe[Str]',
    required => 0,
 );
 

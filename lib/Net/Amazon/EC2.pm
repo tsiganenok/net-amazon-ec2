@@ -1838,6 +1838,18 @@ sub describe_images {
 			}
 			$item->{description} = undef if ref ($item->{description});
 
+			my $tag_sets;
+			foreach my $tag_arr (@{$item->{tagSet}{item}}) {
+                if ( ref $tag_arr->{value} eq "HASH" ) {
+                    $tag_arr->{value} = "";
+                }
+				my $tag = Net::Amazon::EC2::TagSet->new(
+					key => $tag_arr->{key},
+					value => $tag_arr->{value},
+				);
+				push @$tag_sets, $tag;
+			}
+
 			my $image = Net::Amazon::EC2::DescribeImagesResponse->new(
 				image_id				=> $item->{imageId},
 				image_owner_id			=> $item->{imageOwnerId},
@@ -1856,6 +1868,7 @@ sub describe_images {
 				root_device_type		=> $item->{rootDeviceType},
 				root_device_name		=> $item->{rootDeviceName},
 				block_device_mapping	=> $block_device_mappings,
+				tag_set			        => $tag_sets,
 			);
 			
 			if (grep { defined && length } $item->{productCodes} ) {
@@ -2971,6 +2984,18 @@ sub describe_snapshots {
 				$snap->{progress} = undef;
 			}
 
+			my $tag_sets;
+			foreach my $tag_arr (@{$snap->{tagSet}{item}}) {
+                if ( ref $tag_arr->{value} eq "HASH" ) {
+                    $tag_arr->{value} = "";
+                }
+				my $tag = Net::Amazon::EC2::TagSet->new(
+					key => $tag_arr->{key},
+					value => $tag_arr->{value},
+				);
+				push @$tag_sets, $tag;
+			}
+
  			my $snapshot = Net::Amazon::EC2::Snapshot->new(
  				snapshot_id		=> $snap->{snapshotId},
  				status			=> $snap->{status},
@@ -2981,6 +3006,7 @@ sub describe_snapshots {
  				volume_size		=> $snap->{volumeSize},
  				description		=> $snap->{description},
  				owner_alias		=> $snap->{ownerAlias},
+				tag_set			=> $tag_sets,
  			);
  			
  			push @$snapshots, $snapshot;

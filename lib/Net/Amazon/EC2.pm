@@ -69,7 +69,7 @@ use Net::Amazon::EC2::InstanceStatuses;
 use Net::Amazon::EC2::SystemStatus;
 use Net::Amazon::EC2::NetworkInterfaceSet;
 
-$VERSION = '0.29_02';
+$VERSION = '0.30';
 
 =head1 NAME
 
@@ -78,7 +78,7 @@ environment.
 
 =head1 VERSION
 
-This is Net::Amazon::EC2 version 0.29
+This is Net::Amazon::EC2 version 0.30
 
 EC2 Query API version: '2014-06-15'
 
@@ -1468,7 +1468,7 @@ Returns an array ref of Net::Amazon::EC2::DescribeAddress objects
 sub describe_addresses {
 	my $self = shift;
 	my %args = validate( @_, {
-		PublicIp 		=> { type => SCALAR, optional => 1 },
+		PublicIp 		=> { type => SCALAR | ARRAYREF, optional => 1 },
 	});
 
 	# If we have a array ref of ip addresses lets split them out into their PublicIp.n format
@@ -1524,7 +1524,7 @@ Returns an array ref of Net::Amazon::EC2::AvailabilityZone objects
 sub describe_availability_zones {
 	my $self = shift;
 	my %args = validate( @_, {
-		ZoneName	=> { type => SCALAR, optional => 1 },
+		ZoneName	=> { type => SCALAR | ARRAYREF, optional => 1 },
 	});
 
 	# If we have a array ref of zone names lets split them out into their ZoneName.n format
@@ -3782,7 +3782,7 @@ Returns 1 if the reboot succeeded.
 sub reboot_instances {
 	my $self = shift;
 	my %args = validate( @_, {
-		InstanceId	=> { type => SCALAR },
+		InstanceId	=> { type => SCALAR | ARRAYREF },
 	});
 	
 	# If we have a array ref of instances lets split them out into their InstanceId.n format
@@ -3942,6 +3942,27 @@ sub release_address {
 			return undef;
 		}
 	}
+}
+
+sub release_vpc_address {
+   my $self = shift;
+   my %args = validate( @_, {
+      AllocationId       => { type => SCALAR },
+   });
+
+   my $xml = $self->_sign(Action  => 'ReleaseAddress', %args);
+
+   if ( grep { defined && length } $xml->{Errors} ) {
+      return $self->_parse_errors($xml);
+   }
+   else {
+      if ($xml->{return} eq 'true') {
+         return 1;
+      }
+      else {
+         return undef;
+      }
+   }
 }
 
 =head2 reset_image_attribute(%params)

@@ -67,6 +67,7 @@ use Net::Amazon::EC2::Events;
 use Net::Amazon::EC2::InstanceStatus;
 use Net::Amazon::EC2::InstanceStatuses;
 use Net::Amazon::EC2::SystemStatus;
+use Net::Amazon::EC2::NetworkInterfaceSet;
 
 $VERSION = '0.29_02';
 
@@ -1941,6 +1942,7 @@ sub describe_instances {
 				my $product_codes;
 				my $block_device_mappings;
 				my $state_reason;
+            my $network_interfaces_set;
 				
 				if (grep { defined && length } $instance_elem->{productCodes} ) {
 					foreach my $pc (@{$instance_elem->{productCodes}{item}}) {
@@ -1948,6 +1950,35 @@ sub describe_instances {
 						push @$product_codes, $product_code;
 					}
 				}
+
+            if ( grep { defined && length } $instance_elem->{networkInterfaceSet} ) {
+               foreach my $interface( @{$instance_elem->{networkInterfaceSet}{item}} ) {
+                  my $network_interface = Net::Amazon::EC2::NetworkInterfaceSet->new(
+                     network_interface_id => $interface->{networkInterfaceId},
+                     subnet_id            => $interface->{subnetId},
+                     vpc_id               => $interface->{vpcId},
+                     description          => $interface->{description},
+                     status               => $interface->{status},
+                     mac_address          => $interface->{macAddress},
+                     private_ip_address   => $interface->{privateIpAddress},
+                  );
+
+                  if ( grep { defined && length } $interface->{groupSet} ) {
+                     my $groups_set = [];
+                     foreach my $group( @{$interface->{groupSet}{item}} ) {
+                        my $group = Net::Amazon::EC2::GroupSet->new(
+                           group_id   => $group->{groupId},
+                           group_name => $group->{groupName},
+                        );
+                        push @$groups_set, $group;
+                     }
+
+                     $network_interface->{group_sets} = $groups_set;
+                  }
+
+                  push @$network_interfaces_set, $network_interface;
+               }
+            }
 
 				if ( grep { defined && length } $instance_elem->{blockDeviceMapping} ) {
 					foreach my $bdm ( @{$instance_elem->{blockDeviceMapping}{item}} ) {
@@ -2029,6 +2060,7 @@ sub describe_instances {
 					block_device_mapping	=> $block_device_mappings,
 					state_reason			=> $state_reason,
 					tag_set					=> $tag_sets,
+               network_interface_set => $network_interfaces_set,
 				);
 
 				if ($product_codes) {

@@ -194,7 +194,7 @@ ok($delete_tags_result == 1, "Checking for delete tags");
 note("Describe instance status test takes up to 120 seconds to complete. Be patient.");
 my $instance_statuses;
 my $loop_count = 0;
-while ( $loop_count < 20 ) {
+while ( $loop_count < 40 ) {
     $instance_statuses = $ec2->describe_instance_status(); 
     if ( not defined $instance_statuses->[0] ) {
         sleep 5;

@@ -3970,6 +3970,22 @@ sub release_address {
 	}
 }
 
+=head2 release_vpc_address(%params)
+
+Releases an allocated IP address. It takes the following arguments:
+
+=over
+
+=item AllocationId (required)
+
+[EC2-VPC] The allocation ID. Required for EC2-VPC.
+
+=back
+
+Returns true if the releasing succeeded.
+
+=cut
+
 sub release_vpc_address {
    my $self = shift;
    my %args = validate( @_, {
